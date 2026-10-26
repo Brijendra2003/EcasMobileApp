@@ -1,97 +1,89 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# ECAS — mobile app
 
-# Getting Started
+React Native app for professors, students and parents of St. John College of Engineering and Management. Admin roles
+use the web portal (`../college-attendance-system`). Design: [MobileApp_Architecture.md](MobileApp_Architecture.md).
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Everyone signs in with **email and password**, including parents. Professors and students get a password-setup email,
+and parents get a password from the college office (web: People → Guardians → Create login). There is no SMS or OTP
+sign-in.
 
-## Step 1: Start Metro
+Stack: React Native 0.88 (New Architecture, Hermes), TypeScript, React Navigation 7, TanStack Query (persisted to
+encrypted MMKV), SQLCipher via op-sqlite for offline attendance, NativeWind, Supabase.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
-
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Setup
 
 ```sh
-# Using npm
+npm install
+cd ios && bundle install && bundle exec pod install && cd ..   # macOS only
 npm start
-
-# OR using Yarn
-yarn start
+npm run android            # dev flavour, in.edu.sjcem.attendance.dev
+npm run ios                # Debug configuration
 ```
 
-## Step 2: Build and run your app
+`npm run verify` runs the typecheck, lint and unit tests. `npm run test:backend` builds a local database from the web
+project's migrations and runs the mobile API contract tests (`backend/tests`).
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+`src/shared` is generated from the web project. Change it there, then run `npm run sync:shared`.
 
-### Android
+## Environments
 
-```sh
-# Using npm
-npm run android
+Each environment has its own `.env.*` file with **public values only** (Supabase URL and publishable key). The app
+refuses to start if `SUPABASE_URL` or `SUPABASE_PUBLISHABLE_KEY` is missing.
 
-# OR using Yarn
-yarn android
-```
+| Environment | File | Android | iOS |
+|---|---|---|---|
+| Development | `.env.development` | `dev` flavour, id `….dev` | Debug configuration, id `….dev` |
+| Staging | `.env.staging` | `staging` flavour, id `….staging` | Release + `/tmp/envfile` (below) |
+| Production | `.env.production` | `prod` flavour, `in.edu.sjcem.attendance` | Release configuration |
 
-### iOS
+Production must point at the production Supabase project. Dev and staging must never point at it.
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+The app talks to the RPCs and views in `college-attendance-system/supabase/migrations/20261026000100_mobile_api.sql`.
+That migration has to be applied to the target database before the app will work.
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+## Releasing
 
-```sh
-bundle install
-```
+Bump the version on both platforms for every store upload:
 
-Then, and every time you update your native dependencies, run:
+- Android: `versionCode` (+1 every upload) and `versionName` in `android/app/build.gradle`.
+- iOS: `CURRENT_PROJECT_VERSION` (build number) and `MARKETING_VERSION` in Xcode → target → General.
 
-```sh
-bundle exec pod install
-```
+To force old versions to update, raise `app_config.min_mobile_version` on the server. Set `IOS_APP_STORE_ID` in
+`.env.production` once the app exists in App Store Connect, so the update screen opens the app's own page.
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+### Android (Play Store)
 
-```sh
-# Using npm
-npm run ios
+1. Create the upload key once and keep it, and its passwords, somewhere safe outside the repo:
+   ```sh
+   keytool -genkeypair -v -storetype PKCS12 -keystore ecas-upload.jks -alias ecas-upload -keyalg RSA -keysize 2048 -validity 10000
+   ```
+2. Add to `~/.gradle/gradle.properties` (or CI secrets):
+   ```properties
+   ECAS_UPLOAD_STORE_FILE=/absolute/path/to/ecas-upload.jks
+   ECAS_UPLOAD_STORE_PASSWORD=…
+   ECAS_UPLOAD_KEY_ALIAS=ecas-upload
+   ECAS_UPLOAD_KEY_PASSWORD=…
+   ```
+   A `prodRelease` build fails without these; dev and staging release builds fall back to the debug key.
+3. `npm run build:android` → `android/app/build/outputs/bundle/prodRelease/app-prod-release.aab`.
+4. Upload to Play Console with **Play App Signing** enabled. Test on the internal track first.
 
-# OR using Yarn
-yarn ios
-```
+### iOS (App Store)
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+1. In Xcode, open `ios/EcasMobileApp.xcworkspace` → target → Signing & Capabilities. Pick the college's team.
+   Bundle ids: `in.edu.sjcem.attendance` (Release) and `in.edu.sjcem.attendance.dev` (Debug).
+2. `cd ios && bundle exec pod install` after changing the Podfile or native dependencies. The Podfile makes Release read
+   `.env.production` and Debug read `.env.development`.
+3. Product → Archive (Release, "Any iOS Device") → Distribute → App Store Connect → TestFlight.
+4. Staging on iOS: `echo .env.staging > /tmp/envfile`, archive, then **delete `/tmp/envfile`**. It overrides every
+   build while it exists.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Not built yet
 
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- **Push notifications.** Token registration and payload handling exist (`src/lib/push.ts`), but the FCM transport is
+  not attached: it needs a Firebase project (`google-services.json` and `GoogleService-Info.plist` per environment),
+  `@react-native-firebase/messaging` and the APNs key. The server side still needs the dispatcher that drains
+  `notification_outbox`. Until then the in-app notification centre is the only channel.
+- **Crash reporting.** No Sentry or Crashlytics yet.
+- **R8 / ProGuard.** Off (`enableProguardInReleaseBuilds` in `android/app/build.gradle`). Turn it on only together
+  with a full test pass of a release build.

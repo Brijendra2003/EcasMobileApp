@@ -1,5 +1,6 @@
 // Day and week timetable with a session-type filter; changes and cancellations
-// are highlighted (§10). Used by the student Timetable and parent Schedule tabs.
+// are highlighted (§10). Used by the student Timetable and parent Schedule tabs;
+// the week strip is shared with the professor Timetable.
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -13,11 +14,77 @@ import { addDays, dayName, istDate, parseISODate, weekday } from '../../shared/d
 import type { TimetableRow } from '../../types/database';
 import { useTimetable } from './api';
 
-type Kind = 'all' | 'theory' | 'practical';
+export type Kind = 'all' | 'theory' | 'practical';
 
-function weekStart(iso: string) {
+/** Monday of the week containing `iso`. */
+export function weekStart(iso: string) {
   const wd = weekday(iso);
   return addDays(iso, wd === 0 ? -6 : 1 - wd);
+}
+
+export function matchesKind(component: string, kind: Kind): boolean {
+  return kind === 'all' || (kind === 'practical' ? component === 'PR' : component !== 'PR');
+}
+
+interface WeekStripProps {
+  week: string;
+  onWeek: (week: string) => void;
+  selected: string;
+  onSelect: (day: string) => void;
+  kind: Kind;
+  onKind: (kind: Kind) => void;
+}
+
+/** Week navigation, Monday–Saturday day picker and the theory / practical filter. */
+export function WeekStrip({ week, onWeek, selected, onSelect, kind, onKind }: WeekStripProps) {
+  const today = istDate();
+  const days = useMemo(() => Array.from({ length: 6 }, (_, i) => addDays(week, i)), [week]);
+  return (
+    <View className="border-b border-line bg-surface px-2 pb-2 pt-1">
+      <View className="flex-row items-center justify-between px-2">
+        <Pressable accessibilityRole="button" accessibilityLabel="Previous week" hitSlop={10} onPress={() => onWeek(addDays(week, -7))}>
+          <Text className="p-2 text-lg text-primary">‹</Text>
+        </Pressable>
+        <Text variant="label">
+          {parseISODate(week).getUTCDate()} – {parseISODate(addDays(week, 5)).getUTCDate()}{' '}
+          {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][parseISODate(addDays(week, 5)).getUTCMonth()]}
+        </Text>
+        <Pressable accessibilityRole="button" accessibilityLabel="Next week" hitSlop={10} onPress={() => onWeek(addDays(week, 7))}>
+          <Text className="p-2 text-lg text-primary">›</Text>
+        </Pressable>
+      </View>
+      <View className="flex-row">
+        {days.map(d => {
+          const active = d === selected;
+          return (
+            <Pressable
+              key={d}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              onPress={() => onSelect(d)}
+              className={`mx-0.5 min-h-12 flex-1 items-center justify-center rounded-md ${active ? 'bg-primary' : ''}`}
+            >
+              <Text className={`text-xs ${active ? 'text-white' : 'text-muted'}`}>{dayName(d)}</Text>
+              <Text className={`text-base font-semibold ${active ? 'text-white' : d === today ? 'text-primary' : 'text-ink'}`}>
+                {parseISODate(d).getUTCDate()}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <View className="mt-2 px-1">
+        <Segmented<Kind>
+          value={kind}
+          onChange={onKind}
+          options={[
+            { value: 'all', label: 'All' },
+            { value: 'theory', label: 'Theory' },
+            { value: 'practical', label: 'Practical' },
+          ]}
+        />
+      </View>
+    </View>
+  );
 }
 
 export function SessionLine({ s, statusColors }: { s: TimetableRow; statusColors?: Record<string, string> }) {
@@ -58,60 +125,14 @@ export function TimetableView({ studentId, statusColors }: { studentId: string |
   const [selected, setSelected] = useState(today);
   const [kind, setKind] = useState<Kind>('all');
   const q = useTimetable(studentId, week, addDays(week, 6));
-  const days = useMemo(() => Array.from({ length: 6 }, (_, i) => addDays(week, i)), [week]);
 
   return (
     <View className="flex-1">
-      <View className="border-b border-line bg-surface px-2 pb-2 pt-1">
-        <View className="flex-row items-center justify-between px-2">
-          <Pressable accessibilityRole="button" accessibilityLabel="Previous week" hitSlop={10} onPress={() => setWeek(addDays(week, -7))}>
-            <Text className="p-2 text-lg text-primary">‹</Text>
-          </Pressable>
-          <Text variant="label">
-            {parseISODate(week).getUTCDate()} – {parseISODate(addDays(week, 5)).getUTCDate()}{' '}
-            {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][parseISODate(addDays(week, 5)).getUTCMonth()]}
-          </Text>
-          <Pressable accessibilityRole="button" accessibilityLabel="Next week" hitSlop={10} onPress={() => setWeek(addDays(week, 7))}>
-            <Text className="p-2 text-lg text-primary">›</Text>
-          </Pressable>
-        </View>
-        <View className="flex-row">
-          {days.map(d => {
-            const active = d === selected;
-            return (
-              <Pressable
-                key={d}
-                accessibilityRole="button"
-                accessibilityState={{ selected: active }}
-                onPress={() => setSelected(d)}
-                className={`mx-0.5 min-h-12 flex-1 items-center justify-center rounded-md ${active ? 'bg-primary' : ''}`}
-              >
-                <Text className={`text-xs ${active ? 'text-white' : 'text-muted'}`}>{dayName(d)}</Text>
-                <Text className={`text-base font-semibold ${active ? 'text-white' : d === today ? 'text-primary' : 'text-ink'}`}>
-                  {parseISODate(d).getUTCDate()}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        <View className="mt-2 px-1">
-          <Segmented<Kind>
-            value={kind}
-            onChange={setKind}
-            options={[
-              { value: 'all', label: 'All' },
-              { value: 'theory', label: 'Theory' },
-              { value: 'practical', label: 'Practical' },
-            ]}
-          />
-        </View>
-      </View>
+      <WeekStrip week={week} onWeek={setWeek} selected={selected} onSelect={setSelected} kind={kind} onKind={setKind} />
       <ScrollView contentContainerClassName="p-4">
         <QueryView query={q}>
           {rows => {
-            const list = rows.filter(
-              r => r.session_date === selected && (kind === 'all' || (kind === 'practical' ? r.component === 'PR' : r.component !== 'PR')),
-            );
+            const list = rows.filter(r => r.session_date === selected && matchesKind(r.component, kind));
             return list.length === 0 ? (
               <EmptyState title="No lectures" body={weekday(selected) === 0 ? 'Sunday' : undefined} />
             ) : (

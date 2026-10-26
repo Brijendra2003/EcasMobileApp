@@ -30,5 +30,16 @@ target 'EcasMobileApp' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # react-native-config (MobileApp_Architecture.md §17): Debug reads
+    # .env.development and Release reads .env.production. For a staging
+    # build, `echo .env.staging > /tmp/envfile` first (it takes precedence)
+    # and delete /tmp/envfile afterwards.
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'react-native-config'
+      target.build_configurations.each do |c|
+        c.build_settings['ENVFILE'] = c.name == 'Release' ? '.env.production' : '.env.development'
+      end
+    end
   end
 end

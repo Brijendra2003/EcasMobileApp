@@ -5,6 +5,8 @@
   "scripts": {
     "android": "react-native run-android --mode devDebug --appIdSuffix dev",
     "android:staging": "react-native run-android --mode stagingRelease --appIdSuffix staging",
+    "build:android": "react-native build-android --tasks bundleProdRelease",
+    "verify": "tsc --noEmit && eslint . && jest --ci",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
@@ -55,6 +57,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-export-namespace-from": "^7.29.7",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
     "@react-native-community/cli": "20.2.0",

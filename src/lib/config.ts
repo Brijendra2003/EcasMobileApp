@@ -15,6 +15,8 @@ export const config = {
   supabaseUrl: required('SUPABASE_URL', Config.SUPABASE_URL),
   supabasePublishableKey: required('SUPABASE_PUBLISHABLE_KEY', Config.SUPABASE_PUBLISHABLE_KEY),
   cloudinaryCloudName: Config.CLOUDINARY_CLOUD_NAME ?? '',
+  /** Numeric App Store id (App Store Connect → App Information) for the update gate's store link. */
+  iosAppStoreId: Config.IOS_APP_STORE_ID ?? '',
   /** Custom URL scheme for deep links (§12). */
   scheme: 'collegeapp',
 } as const;

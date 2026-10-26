@@ -1,6 +1,6 @@
 # LOCAL TESTING ONLY. Builds a throwaway database from the web project's
-# migrations + seed (+ demo data), then applies the mobile API migration and
-# the contract tests in this folder.
+# migrations (which include the mobile API, 20261026000100_mobile_api.sql)
+# + seed (+ demo data), then runs the contract tests in this folder.
 #   ./backend/test-local.ps1 [-Port 54329] [-Database cas_mobile_test] [-NoDemo]
 param(
   [int]$Port = 54329,
@@ -16,12 +16,6 @@ if ($Database -in @("cas_dev", "postgres")) { throw "Refusing to recreate $Datab
 
 $psql = Join-Path $PgBin "psql.exe"
 $common = @("-U", "postgres", "-h", "localhost", "-p", "$Port", "-w", "-v", "ON_ERROR_STOP=1", "-q", "-d", $Database)
-Get-ChildItem $PSScriptRoot -Filter *.sql | Sort-Object Name | ForEach-Object {
-  $out = & $psql @common -1 -o NUL -f $_.FullName 2>&1
-  if ($LASTEXITCODE -ne 0) { $out | ForEach-Object { Write-Host "    $_" }; throw "failed: $($_.Name)" }
-  $out | Where-Object { "$_" -match "NOTICE|PASS|FAIL" } | ForEach-Object { Write-Host "    $_" }
-  Write-Host "  ok  $($_.Name)"
-}
 if ($NoDemo) { Write-Host "done: $Database (contract tests need demo data)"; return }
 
 $tests = @((Join-Path $Webapp "supabase\tests\test_00_helpers.sql")) + (Get-ChildItem (Join-Path $PSScriptRoot "tests") -Filter *.sql | Sort-Object Name | ForEach-Object FullName)

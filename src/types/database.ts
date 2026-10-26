@@ -1,5 +1,5 @@
 // Database types for the endpoints the mobile app uses (§7.3).
-// Hand-written from Webapp/supabase/migrations + backend/20261026000100_mobile_api.sql
+// Hand-written from Webapp/supabase/migrations (incl. 20261026000100_mobile_api.sql)
 // until `supabase gen types typescript` can run in CI; regenerate then and
 // delete this note.
 

@@ -44,6 +44,18 @@ export function useLocalSessions(from: string, to: string) {
   });
 }
 
+/** Sessions outside the offline window (Timetable weeks further away), from the server. */
+export function useServerSessions(from: string, to: string, enabled: boolean) {
+  const staffId = useStaffId();
+  return useQuery({
+    queryKey: ['sessions', 'range', staffId, from, to],
+    enabled: enabled && !!staffId,
+    staleTime: STALE.timetable,
+    queryFn: async () =>
+      unwrap(await supabase.from('v_my_sessions').select('*').gte('session_date', from).lte('session_date', to).order('starts_at')) as MySessionRow[],
+  });
+}
+
 export function useTeachingGroups() {
   const staffId = useStaffId();
   return useQuery({

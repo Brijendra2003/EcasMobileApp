@@ -86,7 +86,13 @@ apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.grad
 def hasUploadKey = ['ECAS_UPLOAD_STORE_FILE', 'ECAS_UPLOAD_STORE_PASSWORD', 'ECAS_UPLOAD_KEY_ALIAS', 'ECAS_UPLOAD_KEY_PASSWORD']
         .every { project.hasProperty(it) }
 if (!hasUploadKey) {
-    logger.warn("ECAS: ECAS_UPLOAD_* signing properties not found; release builds are signed with the DEBUG key and cannot be uploaded to Play.")
+    logger.warn("ECAS: ECAS_UPLOAD_* signing properties not found; dev/staging release builds are signed with the DEBUG key.")
+}
+// A production release signed with the debug key can never be uploaded to Play: stop the build instead.
+gradle.taskGraph.whenReady { graph ->
+    if (!hasUploadKey && graph.allTasks.any { it.name ==~ /(assemble|bundle|package)ProdRelease/ }) {
+        throw new GradleException("ECAS: prodRelease needs the upload key. Set ECAS_UPLOAD_STORE_FILE, ECAS_UPLOAD_STORE_PASSWORD, ECAS_UPLOAD_KEY_ALIAS and ECAS_UPLOAD_KEY_PASSWORD in ~/.gradle/gradle.properties (see README).")
+    }
 }
 
 android {
@@ -96,7 +102,8 @@ android {
 
     namespace "com.ecasmobileapp"
     defaultConfig {
-        applicationId "com.ecasmobileapp"
+        // Play package name: permanent once uploaded. The Kotlin namespace stays com.ecasmobileapp.
+        applicationId "in.edu.sjcem.attendance"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

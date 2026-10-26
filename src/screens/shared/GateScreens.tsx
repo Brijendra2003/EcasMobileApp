@@ -7,6 +7,7 @@ import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
 import { Text } from '../../components/Text';
 import { signOut } from '../../features/auth/api';
+import { config } from '../../lib/config';
 import { errorMessage } from '../../lib/errors';
 import { personasFor, type Persona } from '../../lib/personas';
 import type { RootStackParamList } from '../../navigation/types';
@@ -66,7 +67,12 @@ export function UseWebPortalScreen() {
 }
 
 export function UpdateRequiredScreen({ route }: NativeStackScreenProps<RootStackParamList, 'UpdateRequired'>) {
-  const store = Platform.OS === 'ios' ? 'https://apps.apple.com' : `market://details?id=${DeviceInfo.getBundleId()}`;
+  const store =
+    Platform.OS === 'ios'
+      ? config.iosAppStoreId
+        ? `itms-apps://apps.apple.com/app/id${config.iosAppStoreId}`
+        : 'https://apps.apple.com'
+      : `market://details?id=${DeviceInfo.getBundleId()}`;
   return (
     <Screen topInset>
       <View className="mt-16 items-center">
