@@ -18,8 +18,9 @@ interface Props {
 export function Screen({ children, scroll = true, refreshing, onRefresh, topInset, footer }: Props) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const paddingTop = topInset ? insets.top : 0;
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: topInset ? insets.top : 0 }}>
+    <View className="flex-1 bg-canvas" style={{ paddingTop }}>
       <OfflineBanner />
       {scroll ? (
         <ScrollView

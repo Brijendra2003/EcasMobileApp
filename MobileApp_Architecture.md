@@ -127,7 +127,7 @@ MobileApp/mobile-app/
 │   ├── App.tsx                         # providers (Query, theme, i18n) + NavigationContainer
 │   ├── navigation/
 │   │   ├── RootNavigator.tsx           # auth / persona switch (below)
-│   │   ├── AuthNavigator.tsx           # SignIn, Phone, VerifyOtp, ForgotPassword, SetPassword
+│   │   ├── AuthNavigator.tsx           # SignIn, ForgotPassword (SetPassword is at the root)
 │   │   ├── ProfessorNavigator.tsx      # tabs: Today · Timetable · Classes · Inbox · More + stack
 │   │   ├── StudentNavigator.tsx        # tabs: Home · Attendance · Timetable · Leave · More + stack
 │   │   ├── ParentNavigator.tsx         # tabs: Home · Attendance · Schedule · Notices · More + stack
@@ -209,7 +209,7 @@ This is React Navigation's recommended auth-flow pattern: screens are defined co
 |---|---|---|
 | Professor | Email + password (Google sign-in if the college uses Google Workspace) | Account provisioned by Ops. First login comes from an invite link that sets a password |
 | Student | Email + password | Provisioned by Ops at import. Invite link sets the password |
-| Parent | **Mobile number + OTP** | The number must match a **verified** guardian record. SMS goes through the Supabase *Send SMS Hook* to a DLT-registered Indian provider |
+| Parent | Email + password | Account provisioned by Ops on the guardian record. Invite link sets the password. Access covers only children whose `guardian_links` are **verified** |
 
 - **There is no self-registration.** Parent access exists only through `guardian_links` that Ops has verified. Knowing an enrollment number or PRN grants nothing.
 - Password reset and invite links open the app through deep links (`set-password`). On devices without the app installed they fall back to a small web page.
@@ -791,7 +791,7 @@ Phase 02 builds attendance submission on the idempotent RPC and the SQLite draft
 
 ## 22. Decisions to confirm
 
-1. **Student login identifier:** college email, personal email, or phone OTP?
+1. **Login identifier:** email + password for every persona (decided 2026-10-26). College email or personal email for students and parents?
 2. **Marking default:** start with everyone *Pending* (the blueprint's rule, proposed here) or everyone *Present*?
 3. **Marking window:** how many minutes before the start can marking open, and is marking allowed before the lecture ends?
 4. **Roster photos:** on by default? Photos need college consent under the DPDP notice.

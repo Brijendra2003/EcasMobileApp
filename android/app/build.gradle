@@ -83,6 +83,12 @@ project.ext.envConfigFiles = [
 ]
 apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
+def hasUploadKey = ['ECAS_UPLOAD_STORE_FILE', 'ECAS_UPLOAD_STORE_PASSWORD', 'ECAS_UPLOAD_KEY_ALIAS', 'ECAS_UPLOAD_KEY_PASSWORD']
+        .every { project.hasProperty(it) }
+if (!hasUploadKey) {
+    logger.warn("ECAS: ECAS_UPLOAD_* signing properties not found; release builds are signed with the DEBUG key and cannot be uploaded to Play.")
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -124,15 +130,23 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        // Upload key (§17): never in git. ECAS_UPLOAD_* come from ~/.gradle/gradle.properties
+        // locally and from secrets in CI; Play App Signing holds the final key.
+        if (hasUploadKey) {
+            release {
+                storeFile file(ECAS_UPLOAD_STORE_FILE)
+                storePassword ECAS_UPLOAD_STORE_PASSWORD
+                keyAlias ECAS_UPLOAD_KEY_ALIAS
+                keyPassword ECAS_UPLOAD_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig hasUploadKey ? signingConfigs.release : signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }

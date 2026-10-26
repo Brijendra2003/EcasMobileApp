@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { standing, type Standing } from '../shared/attendance';
 import { useTheme } from './theme';
@@ -30,7 +30,7 @@ export function PercentRing({ percent, min, warn, size = 132, label }: Props) {
       style={{ width: size, height: size }}
       className="items-center justify-center"
     >
-      <Svg width={size} height={size} style={{ position: 'absolute' }}>
+      <Svg width={size} height={size} style={styles.ring}>
         <Circle cx={size / 2} cy={size / 2} r={r} stroke={colors.line} strokeWidth={stroke} fill="none" />
         <Circle
           cx={size / 2}
@@ -51,3 +51,5 @@ export function PercentRing({ percent, min, warn, size = 132, label }: Props) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({ ring: { position: 'absolute' } });

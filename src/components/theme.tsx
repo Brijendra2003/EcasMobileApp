@@ -2,7 +2,7 @@
 // NativeWind classes (bg-canvas, text-ink …) through CSS variables, and
 // non-class consumers (icons, navigation, status bar) through useTheme().
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
-import { useColorScheme, View } from 'react-native';
+import { StyleSheet, useColorScheme, View } from 'react-native';
 import { vars } from 'nativewind';
 import { brand, statusColors } from '../shared/tokens';
 
@@ -11,6 +11,7 @@ type Palette = { [K in keyof typeof brand.light]: string };
 function rgbTriplet(hex: string): string {
   const h = hex.replace('#', '');
   const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+  // eslint-disable-next-line no-bitwise -- unpacking a hex colour
   return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
 }
 
@@ -18,6 +19,7 @@ function cssVars(p: Palette) {
   return vars(Object.fromEntries(Object.entries(p).map(([k, v]) => [`--color-${k}`, rgbTriplet(v)])));
 }
 
+const styles = StyleSheet.create({ fill: { flex: 1 } });
 const LIGHT_VARS = cssVars(brand.light);
 const DARK_VARS = cssVars(brand.dark);
 
@@ -39,7 +41,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
   return (
     <ThemeContext.Provider value={theme}>
-      <View style={[{ flex: 1 }, dark ? DARK_VARS : LIGHT_VARS]} className="bg-canvas">
+      <View style={[styles.fill, dark ? DARK_VARS : LIGHT_VARS]} className="bg-canvas">
         {children}
       </View>
     </ThemeContext.Provider>

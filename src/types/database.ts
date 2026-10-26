@@ -2,15 +2,17 @@
 // Hand-written from Webapp/supabase/migrations + backend/20261026000100_mobile_api.sql
 // until `supabase gen types typescript` can run in CI; regenerate then and
 // delete this note.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-type View<Row> = { Row: Row; Relationships: [] };
+// Interfaces have no implicit index signature, so they fail postgrest-js's
+// `Record<string, unknown>` row constraint; mapping them to type literals fixes that.
+type Plain<T> = { [K in keyof T]: T[K] };
+type View<Row> = { Row: Plain<Row>; Relationships: [] };
 type Table<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
-  Row: Row;
-  Insert: Insert;
-  Update: Update;
+  Row: Plain<Row>;
+  Insert: Plain<Insert>;
+  Update: Plain<Update>;
   Relationships: [];
 };
 
@@ -466,7 +468,6 @@ export type Database = {
     };
     Functions: {
       my_capabilities: { Args: Record<string, never>; Returns: Json };
-      link_guardian_account: { Args: Record<string, never>; Returns: number };
       register_device: {
         Args: { p_token: string; p_platform: string; p_app_version?: string; p_device_id?: string };
         Returns: undefined;

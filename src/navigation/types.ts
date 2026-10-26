@@ -8,14 +8,13 @@ export type RootStackParamList = {
   Parent: NavigatorScreenParams<ParentStackParamList> | undefined;
   PersonaSelect: undefined;
   UseWebPortal: undefined;
+  UpdateRequired: { minVersion: string };
   /** Invite / reset links sign the user in first, so this lives at the root. */
   SetPassword: undefined;
 };
 
 export type AuthStackParamList = {
   SignIn: undefined;
-  Phone: undefined;
-  VerifyOtp: { phone: string };
   ForgotPassword: undefined;
 };
 
@@ -48,7 +47,6 @@ export type ProfessorStackParamList = SharedStackParamList & {
   Register: { sessionId: string };
   Conflict: { sessionId: string };
   CorrectionRequest: { sessionId: string };
-  SessionList: { kind: 'pending' | 'overdue' };
   ClassDetail: { groupId: string; title: string };
   LeaveApproval: { leaveId: string };
   DisputeThread: { disputeId: string };
@@ -88,7 +86,6 @@ export type ParentStackParamList = SharedStackParamList & {
 };
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace ReactNavigation {
     interface RootParamList extends RootStackParamList {}
   }

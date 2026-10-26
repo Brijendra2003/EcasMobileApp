@@ -15,7 +15,7 @@ import type { AuthStackParamList } from '../../navigation/types';
 import { useSession } from '../../stores/session';
 
 const schema = z.object({
-  email: z.email('Enter your college email'),
+  email: z.email('Enter your email'),
   password: z.string().min(6, 'Enter your password'),
 });
 type Form = z.infer<typeof schema>;
@@ -40,7 +40,7 @@ export function SignInScreen({ navigation }: NativeStackScreenProps<AuthStackPar
       <View className="mb-8 mt-10 items-center">
         <Image source={require('../../assets/logo.png')} className="mb-4 h-20 w-20" resizeMode="contain" accessibilityIgnoresInvertColors />
         <Text variant="title">Attendance</Text>
-        <Text variant="muted">Professors and students</Text>
+        <Text variant="muted">Professors, students and parents</Text>
       </View>
       {reason ? (
         <View className="mb-4">
@@ -52,7 +52,7 @@ export function SignInScreen({ navigation }: NativeStackScreenProps<AuthStackPar
         name="email"
         render={({ field, fieldState }) => (
           <TextField
-            label="College email"
+            label="Email"
             autoCapitalize="none"
             autoComplete="email"
             keyboardType="email-address"
@@ -76,23 +76,17 @@ export function SignInScreen({ navigation }: NativeStackScreenProps<AuthStackPar
             value={field.value}
             onChangeText={field.onChange}
             onBlur={field.onBlur}
-            onSubmitEditing={onSubmit}
+            onSubmitEditing={() => onSubmit()}
             error={fieldState.error?.message}
           />
         )}
       />
       {error ? <Text className="mb-3 text-sm text-danger">{error}</Text> : null}
-      <Button title="Sign in" onPress={onSubmit} loading={formState.isSubmitting} />
+      <Button title="Sign in" onPress={() => onSubmit()} loading={formState.isSubmitting} />
       <Button variant="ghost" title="Forgot password?" className="mt-2" onPress={() => navigation.navigate('ForgotPassword')} />
-
-      <View className="my-8 h-px bg-line" />
-      <Text variant="subheading" className="mb-1 text-center">
-        Parent or guardian?
+      <Text variant="caption" className="mt-6 text-center">
+        Accounts are created by the college office. Use the email and password from your invite.
       </Text>
-      <Text variant="muted" className="mb-3 text-center">
-        Sign in with the mobile number the college has on record.
-      </Text>
-      <Button variant="secondary" title="Sign in with mobile number" onPress={() => navigation.navigate('Phone')} />
     </Screen>
   );
 }

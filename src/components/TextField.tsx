@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, type ComponentRef } from 'react';
 import { TextInput, View, type TextInputProps } from 'react-native';
 import { useTheme } from './theme';
 import { Text } from './Text';
@@ -9,7 +9,8 @@ interface Props extends TextInputProps {
   hint?: string;
 }
 
-export const TextField = forwardRef<TextInput, Props>(function TextField({ label, error, hint, multiline, ...rest }, ref) {
+// eslint-disable-next-line @typescript-eslint/no-shadow -- named for React DevTools
+export const TextField = forwardRef<ComponentRef<typeof TextInput>, Props>(function TextField({ label, error, hint, multiline, ...rest }, ref) {
   const { colors } = useTheme();
   return (
     <View className="mb-4">

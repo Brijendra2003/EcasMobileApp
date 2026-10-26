@@ -64,7 +64,11 @@ export function ChildSwitcher() {
           </Text>
           {current?.division_label ? <Text variant="caption">{current.division_label}</Text> : null}
         </View>
-        {many ? <ChevronDown size={18} color={colors.ink} style={{ marginLeft: 4 }} /> : null}
+        {many ? (
+          <View className="ml-1">
+            <ChevronDown size={18} color={colors.ink} />
+          </View>
+        ) : null}
       </Pressable>
       <Sheet visible={open} onClose={() => setOpen(false)} title={t('parent.switchChild')}>
         {(children.data ?? []).map(c => (

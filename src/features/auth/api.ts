@@ -1,5 +1,5 @@
 // Sign-in, deep-link auth and guarded sign-out (§5.1, §5.2).
-import { ApiError, toApiError, unwrap } from '../../lib/errors';
+import { ApiError } from '../../lib/errors';
 import { config } from '../../lib/config';
 import { unregisterPush } from '../../lib/push';
 import { queryClient } from '../../lib/query-client';
@@ -10,48 +10,15 @@ import { hasUnsyncedWork } from '../../offline/repo';
 import { useSession } from '../../stores/session';
 import { useSyncStatus } from '../../stores/sync';
 
-/** Indian mobile number as E.164 (+91XXXXXXXXXX). */
-export function toE164(phone: string): string {
-  const digits = phone.replace(/\D/g, '').replace(/^(91)?/, '');
-  return `+91${digits}`;
-}
-
+/**
+ * Every persona signs in with email + password (§5.1). Accounts are
+ * provisioned by Operations; a parent sees only children whose guardian
+ * links Operations verified.
+ */
 export async function signInWithPassword(email: string, password: string) {
   const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
   if (error) {
     throw new ApiError(error.status === 400 ? 'BAD_CREDENTIALS' : 'NETWORK', error.status === 400 ? 'Email or password is incorrect.' : error.message);
-  }
-}
-
-export async function sendOtp(phone: string) {
-  const { error } = await supabase.auth.signInWithOtp({ phone: toE164(phone), options: { shouldCreateUser: true } });
-  if (error) {
-    throw new ApiError('OTP_FAILED', error.message || 'Could not send the code. Try again.');
-  }
-}
-
-/**
- * Parents (§5.1): verify the OTP, then link the account to guardian records
- * whose phone the college verified. No verified link → no access.
- */
-export async function verifyOtp(phone: string, token: string) {
-  const { error } = await supabase.auth.verifyOtp({ phone: toE164(phone), token, type: 'sms' });
-  if (error) {
-    throw new ApiError('OTP_INVALID', 'That code is wrong or has expired.');
-  }
-  try {
-    const linked = unwrap(await supabase.rpc('link_guardian_account'));
-    if (!linked) {
-      await supabase.auth.signOut();
-      throw new ApiError('NO_PHONE', 'This number is not linked to a verified student. Contact the college office.');
-    }
-    // New roles arrive in the next access token.
-    await supabase.auth.refreshSession();
-  } catch (e) {
-    if (e instanceof ApiError) {
-      throw e;
-    }
-    throw toApiError(e as Error);
   }
 }
 

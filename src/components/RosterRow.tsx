@@ -6,6 +6,8 @@ import type { RosterEntry } from '../features/marking/logic';
 import { StatusPill, statusColor } from './StatusPill';
 import { Text } from './Text';
 
+const TRANSPARENT = 'transparent';
+
 interface Props {
   entry: RosterEntry & { batch_code?: string | null };
   colors: Record<string, string>;
@@ -23,6 +25,7 @@ function useA11yLabel(entry: RosterEntry, status: string | null, readOnly: boole
 }
 
 /** List layout: large roll number, name, status letter (§8.2). */
+// eslint-disable-next-line @typescript-eslint/no-shadow -- named for React DevTools
 export const RosterRow = memo(function RosterRow({ entry, colors, onLongPress }: Props) {
   const status = useStudentStatus(entry.student_id, entry.suggested_status);
   const readOnly = useMarking(s => s.readOnly);
@@ -37,8 +40,8 @@ export const RosterRow = memo(function RosterRow({ entry, colors, onLongPress }:
       onPress={() => useMarking.getState().toggle(entry.student_id)}
       onLongPress={onLongPress ? () => onLongPress(entry) : undefined}
       delayLongPress={350}
-      className="min-h-14 flex-row items-center border-b border-line bg-surface px-4"
-      style={c ? { borderLeftWidth: 4, borderLeftColor: c } : { borderLeftWidth: 4, borderLeftColor: 'transparent' }}
+      className="min-h-14 flex-row items-center border-b border-l-4 border-line bg-surface px-4"
+      style={{ borderLeftColor: c ?? TRANSPARENT }}
     >
       <Text className="w-14 text-2xl font-bold text-ink">{entry.roll_no ?? '–'}</Text>
       <View className="flex-1 py-2">
@@ -57,6 +60,7 @@ export const RosterRow = memo(function RosterRow({ entry, colors, onLongPress }:
 });
 
 /** Grid layout: roll-number tiles, fastest for tapping a few absentees. */
+// eslint-disable-next-line @typescript-eslint/no-shadow -- named for React DevTools
 export const RosterTile = memo(function RosterTile({ entry, colors, onLongPress }: Props) {
   const status = useStudentStatus(entry.student_id, entry.suggested_status);
   const readOnly = useMarking(s => s.readOnly);

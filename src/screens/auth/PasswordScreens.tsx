@@ -17,7 +17,7 @@ export function ForgotPasswordScreen() {
 
   const submit = async () => {
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-      setError('Enter your college email');
+      setError('Enter your email');
       return;
     }
     setBusy(true);
@@ -42,7 +42,7 @@ export function ForgotPasswordScreen() {
             We'll email you a link to set a new password.
           </Text>
           <TextField
-            label="College email"
+            label="Email"
             autoCapitalize="none"
             keyboardType="email-address"
             value={email}

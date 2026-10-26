@@ -2,7 +2,7 @@
 // app is in the foreground.
 import 'react-native-url-polyfill/auto';
 import { AppState } from 'react-native';
-import { createClient, processLock } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/database';
 import { config } from './config';
 import { supabaseAuthStorage } from './storage';
@@ -13,7 +13,6 @@ export const supabase = createClient<Database>(config.supabaseUrl, config.supaba
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
-    lock: processLock,
   },
 });
 

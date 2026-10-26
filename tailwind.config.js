@@ -5,7 +5,7 @@ const token = name => `rgb(var(--color-${name}) / <alpha-value>)`;
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./App.tsx', './src/**/*.{ts,tsx}'],
+  content: ['./src/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {

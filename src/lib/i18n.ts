@@ -86,7 +86,7 @@ const en = {
     absenceInstant: 'Absence alerts as they happen',
     absenceDigest: 'One daily summary at 6:30 PM',
     shortageAlerts: 'Shortage and weekly summary alerts',
-    noChildren: 'No verified student is linked to this number. Contact the college office.',
+    noChildren: 'No verified student is linked to this account. Contact the college office.',
     contactUpdate: 'To change your phone number, contact the college office. It is verified again before use.',
   },
 };
@@ -113,7 +113,7 @@ const mr: Dict = {
     absences: 'अनुपस्थिती', approvedLeave: 'मंजूर रजा', askAboutThis: 'याबद्दल विचारा', askTitle: 'वर्गशिक्षकांना विचारा',
     askPlaceholder: 'तुम्हाला काय जाणून घ्यायचे आहे?', askSent: 'तुमचा प्रश्न वर्गशिक्षकांना पाठवला आहे.', preferences: 'सूचना प्राधान्ये',
     absenceInstant: 'अनुपस्थितीची सूचना लगेच', absenceDigest: 'रोज संध्याकाळी 6:30 वाजता एक सारांश', shortageAlerts: 'कमतरता आणि साप्ताहिक सारांश',
-    noChildren: 'या नंबरशी कोणताही पडताळलेला विद्यार्थी जोडलेला नाही. महाविद्यालय कार्यालयाशी संपर्क साधा.',
+    noChildren: 'या खात्याशी कोणताही पडताळलेला विद्यार्थी जोडलेला नाही. महाविद्यालय कार्यालयाशी संपर्क साधा.',
     contactUpdate: 'फोन नंबर बदलण्यासाठी महाविद्यालय कार्यालयाशी संपर्क साधा. वापरण्यापूर्वी तो पुन्हा पडताळला जातो.',
   },
 };
@@ -138,7 +138,7 @@ const hi: Dict = {
     absences: 'अनुपस्थिति', approvedLeave: 'स्वीकृत छुट्टी', askAboutThis: 'इसके बारे में पूछें', askTitle: 'कक्षा शिक्षक से पूछें',
     askPlaceholder: 'आप क्या जानना चाहते हैं?', askSent: 'आपका प्रश्न कक्षा शिक्षक को भेज दिया गया है।', preferences: 'सूचना प्राथमिकताएँ',
     absenceInstant: 'अनुपस्थिति की सूचना तुरंत', absenceDigest: 'रोज़ शाम 6:30 बजे एक सारांश', shortageAlerts: 'कमी और साप्ताहिक सारांश',
-    noChildren: 'इस नंबर से कोई सत्यापित छात्र जुड़ा नहीं है। कॉलेज कार्यालय से संपर्क करें।',
+    noChildren: 'इस खाते से कोई सत्यापित छात्र जुड़ा नहीं है। कॉलेज कार्यालय से संपर्क करें।',
     contactUpdate: 'फ़ोन नंबर बदलने के लिए कॉलेज कार्यालय से संपर्क करें। उपयोग से पहले इसे फिर से सत्यापित किया जाता है।',
   },
 };

@@ -21,6 +21,7 @@ export function NotificationsScreen({ navigation }: NativeStackScreenProps<Share
 
   useEffect(() => {
     navigation.setOptions({
+      // eslint-disable-next-line react/no-unstable-nested-components -- header render callback
       headerRight: () =>
         unread > 0 ? (
           <Pressable accessibilityRole="button" onPress={() => markRead.mutate(undefined)} hitSlop={8}>
@@ -47,7 +48,15 @@ export function NotificationsScreen({ navigation }: NativeStackScreenProps<Share
           <FlatList
             data={data}
             keyExtractor={n => n.id}
-            refreshControl={<RefreshControl refreshing={q.isRefetching} onRefresh={() => q.refetch()} tintColor={colors.muted} />}
+            refreshControl={
+              <RefreshControl
+                refreshing={q.isRefetching}
+                onRefresh={() => {
+                  q.refetch();
+                }}
+                tintColor={colors.muted}
+              />
+            }
             ListEmptyComponent={<EmptyState title={t('common.nothingHere')} body="Attendance alerts, approvals and notices appear here." />}
             renderItem={({ item }) => (
               <Pressable
